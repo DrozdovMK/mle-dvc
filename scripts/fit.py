@@ -3,9 +3,9 @@
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from category_encoders import CatBoostEncoder
+from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from catboost import CatBoostClassifier
+from category_encoders import CatBoostEncoder
 import yaml
 import os
 import joblib
@@ -18,6 +18,7 @@ def fit_model():
     # загрузите результат предыдущего шага: inital_data.csv
     data = pd.read_csv('data/initial_data.csv')
     # реализуйте основную логику шага с использованием гиперпараметров
+    data.drop(columns=["begin_date", "end_date"], inplace=True)
     # обучение модели
     
     cat_features = data.select_dtypes(include='object')
@@ -31,14 +32,14 @@ def fit_model():
     preprocessor = ColumnTransformer(
         [
             ('binary', OneHotEncoder(drop=params['one_hot_drop']), binary_cat_features.columns.tolist()),
-            ('cat', CatBoostEncoder(return_df=False), other_cat_features.columns.tolist()),
+            ('cat', OneHotEncoder(), other_cat_features.columns.tolist()),
             ('num', StandardScaler(), num_features.columns.tolist())
         ],
         remainder='drop',
         verbose_feature_names_out=False
     )
 
-    model = CatBoostClassifier(auto_class_weights=params["auto_class_weights"])
+    model = LogisticRegression(C=params["C"], penalty=params["penalty"])
 
     pipeline = Pipeline(
         [
