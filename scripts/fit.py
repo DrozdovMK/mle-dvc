@@ -18,6 +18,7 @@ def fit_model():
     # загрузите результат предыдущего шага: inital_data.csv
     data = pd.read_csv('data/initial_data.csv')
     # реализуйте основную логику шага с использованием гиперпараметров
+    data.drop(columns=['begin_date', 'end_date'], inplace=True)
     # обучение модели
     
     cat_features = data.select_dtypes(include='object')
